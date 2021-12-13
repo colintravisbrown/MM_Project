@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 from LPythranTest import laplace_pyth
-from scipy.signal import convolve2d
 def updateConv(mGrid):
     kernel_avg = np.array([[1, 1, 1],
                            [1, -8, 1],
@@ -14,15 +13,15 @@ def updateConv(mGrid):
         l0 = laplace_pyth(mGrid[0], wrap)
         l1 = laplace_pyth(mGrid[1], wrap)
     else:
-        l0 = convolve2d(mGrid[0], kernel_avg, mode='same', boundary='fill')
-        l1 = convolve2d(mGrid[1], kernel_avg, mode='same', boundary='fill')
+        l0 = laplace_pyth(np.pad(mGrid[0],1), wrap)/(0.125**2)
+        l1 = laplace_pyth(np.pad(mGrid[1],1), wrap)/(0.125**2)
 
 
 
     x = mGrid[0]
     y = mGrid[1]
-    mGrid[0] = mGrid[0] + 0.0001 * (d1 * l0 + x + q*f*y/(q + x) - x**2 - x*f*y/(q + x))
-    mGrid[1] = mGrid[1] + 0.0001 * (d2 * l1 + x - y)
+    mGrid[0] = mGrid[0] + 0.00025 * (d1 * l0 + 1/ep*(x + q*f*y/(q + x) - x**2 - x*f*y/(q + x)))
+    mGrid[1] = mGrid[1] + 0.00025 * (d2 * l1 + x - y)
 
     return mGrid
 
@@ -73,14 +72,14 @@ def init_circle(n_grid):
 
 mpl.use('TkAgg')
 
-n_grid = 128
+n_grid = 128*2
 fig, ax = plt.subplots()
 
 
-ep, f, q, d1, d2 = (0.01, 1.4, 0.0008, 1, 0.6)
+ep, f, q, d1, d2 = (0.03, 2.0, 0.001, 1, 0.6)
 wrap = False
 ss = 1/2*(1 - f - q + np.sqrt((1 - f - q)**2 + 4*q*(1 + f)))
-grid = np.ones((2,n_grid,n_grid))*ss + (np.random.rand(2,n_grid,n_grid)-0.5)*ss*0.1
+# grid = np.ones((2,n_grid,n_grid))*ss + (np.random.rand(2,n_grid,n_grid)-0.5)*ss*0.1
 #grid = init_circle(n_grid)
 grid = init_spiral(n_grid)
 
@@ -93,7 +92,7 @@ im = ax.imshow(grid[0], animated=True)
 
 def loop2(*args):
     global grid
-    for i in range(1500):
+    for i in range(500):
         grid = updateConv(grid)
     im.set_array(grid[0])
     # norm = mpl.colors.Normalize(vmin = grid[0].min(), vmax = grid[0].max())
