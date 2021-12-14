@@ -6,9 +6,7 @@ import matplotlib.animation as animation
 
 from LPythranTest import laplace_pyth
 def updateConv(mGrid):
-    kernel_avg = np.array([[1, 1, 1],
-                           [1, -8, 1],
-                           [1, 1, 1]])
+
     if wrap:
         l0 = laplace_pyth(mGrid[0], wrap)
         l1 = laplace_pyth(mGrid[1], wrap)
@@ -76,28 +74,28 @@ n_grid = 128*2
 fig, ax = plt.subplots()
 
 
-ep, f, q, d1, d2 = (0.03, 2.0, 0.001, 1, 0.6)
-wrap = False
+ep, f, q, d1, d2 = (0.25, 0.7, 0.0008, 3, 0.03)
+wrap = True
 ss = 1/2*(1 - f - q + np.sqrt((1 - f - q)**2 + 4*q*(1 + f)))
-# grid = np.ones((2,n_grid,n_grid))*ss + (np.random.rand(2,n_grid,n_grid)-0.5)*ss*0.1
+grid = np.ones((2,n_grid,n_grid))*ss + (np.random.rand(2,n_grid,n_grid)-0.5)*ss*0.1
 #grid = init_circle(n_grid)
-grid = init_spiral(n_grid)
+#grid = init_spiral(n_grid)
 
-# for i in range(10000):
-#     grid = updateConv(grid)
+for i in range(10000):
+    grid = updateConv(grid)
 
 
 im = ax.imshow(grid[0], animated=True)
-# cb = fig.colorbar(im)
+cb = fig.colorbar(im)
 
 def loop2(*args):
     global grid
-    for i in range(500):
+    for i in range(1000):
         grid = updateConv(grid)
     im.set_array(grid[0])
-    # norm = mpl.colors.Normalize(vmin = grid[0].min(), vmax = grid[0].max())
-    # im.set_norm(norm)
-    #im.set_clim(grid[0].min(), grid[0].max())
+    norm = mpl.colors.Normalize(vmin = grid[0].min(), vmax = grid[0].max())
+    im.set_norm(norm)
+    im.set_clim(grid[0].min(), grid[0].max())
     if np.any(grid <0):
         print('instability')
         quit()
